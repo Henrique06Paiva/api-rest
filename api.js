@@ -83,6 +83,28 @@ app.post("/products", async (req, res) => {
   }
 });
 
+app.delete("/products/:name", async (req, res) => {
+  try {
+    const { name } = req.params;
+    const snapshot = await db
+      .collection("products")
+      .where("name", "==", name)
+      .get();
+    if (snapshot.empty) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+    const batch = db.batch();
+    snapshot.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+    await batch.commit();
+    res.json({ message: "Product deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    res.status(500).json({ error: "Failed to delete product" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
