@@ -105,6 +105,29 @@ app.delete("/products/:name", async (req, res) => {
   }
 });
 
+app.put("/products/:name", async (req, res) => {
+  const { name } = req.params;
+  const { price } = req.body;
+  try {
+    const snapshot = await db
+      .collection("products")
+      .where("name", "==", name)
+      .get();
+    if (snapshot.empty) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+    const batch = db.batch();
+    snapshot.forEach((doc) => {
+      batch.update(doc.ref, { price });
+    });
+    await batch.commit();
+    res.json({ message: "Product updated successfully" });
+  } catch (error) {
+    console.error("Error updating product:", error);
+    res.status(500).json({ error: "Failed to update product" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
