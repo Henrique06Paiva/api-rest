@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import Navbar from './components/Navbar'
+import Sidebar from './components/Sidebar'
 import UsersPage from './pages/UsersPage'
 import ProductsPage from './pages/ProductsPage'
 import './App.css'
@@ -10,27 +10,21 @@ export default function App() {
   const [productsCount, setProductsCount] = useState(0)
 
   return (
-    <div className="app-layout">
-      <Navbar
+    <div className="app-shell">
+      <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         usersCount={usersCount}
         productsCount={productsCount}
       />
 
-      <main className="main-content">
+      <main className="main-area">
         {activeTab === 'users' ? (
           <UsersPage onCountChange={setUsersCount} />
         ) : (
           <ProductsPage onCountChange={setProductsCount} />
         )}
       </main>
-
-      <footer className="app-footer">
-        <p>
-          ⚡ Conectado à API REST: <code>http://localhost:3000</code> &bull; Banco de Dados: Firestore
-        </p>
-      </footer>
     </div>
   )
 }

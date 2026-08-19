@@ -1,40 +1,38 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Space+Mono:wght@400;700&display=swap');
 
 :root {
-  --font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  
-  /* Color Palette - Dark Modern Glassmorphism */
-  --bg-primary: #0a0e17;
-  --bg-secondary: #111827;
-  --bg-card: rgba(17, 24, 39, 0.85);
-  --bg-card-hover: rgba(31, 41, 55, 0.7);
-  --bg-input: #1f2937;
-  
-  --border-color: rgba(255, 255, 255, 0.08);
-  --border-hover: rgba(99, 102, 241, 0.4);
-  
-  --primary: #6366f1;
-  --primary-hover: #4f46e5;
-  --primary-glow: rgba(99, 102, 241, 0.25);
-  
-  --accent: #06b6d4;
-  --success: #10b981;
-  --warning: #f59e0b;
-  --danger: #ef4444;
-  --danger-hover: #dc2626;
-  
-  --text-main: #f9fafb;
-  --text-muted: #9ca3af;
-  --text-dim: #6b7280;
-  
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
-  --shadow-glow: 0 0 25px var(--primary-glow);
-  
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
+  /* Warm editorial palette — not the typical AI indigo/cyan */
+  --bg: #faf8f5;
+  --bg-raised: #ffffff;
+  --bg-inset: #f2efe9;
+  --bg-sidebar: #1a1a1a;
+
+  --ink: #1a1a1a;
+  --ink-light: #5c5c5c;
+  --ink-faint: #a3a3a3;
+  --ink-inverse: #faf8f5;
+
+  --border: #e4e0d9;
+  --border-strong: #c9c3b8;
+
+  --accent: #c45d3e;
+  --accent-hover: #a94b30;
+  --accent-soft: #fdf0ec;
+
+  --green: #2d7a4f;
+  --green-soft: #e8f5ee;
+  --red: #b5342b;
+  --red-soft: #fceae9;
+
+  --radius: 4px;
+  --radius-md: 8px;
+
+  --font: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --mono: 'Space Mono', 'SF Mono', 'Fira Code', monospace;
+
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-raised: 0 4px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-modal: 0 16px 48px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.08);
 }
 
 * {
@@ -43,19 +41,24 @@
   box-sizing: border-box;
 }
 
+html {
+  font-size: 15px;
+}
+
 body {
-  font-family: var(--font-family);
-  background-color: var(--bg-primary);
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.08) 0px, transparent 50%);
-  background-attachment: fixed;
-  color: var(--text-main);
-  min-height: 100vh;
-  line-height: 1.5;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 input, button, select, textarea {
   font-family: inherit;
+}
+
+::selection {
+  background: var(--accent);
+  color: white;
 }

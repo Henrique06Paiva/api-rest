@@ -1,28 +1,50 @@
 import React, { useState, useEffect } from 'react'
 import { getUsers, createUser, updateUser, deleteUser } from '../services/userService'
 
+// Inline SVG icons
+const SearchIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+  </svg>
+)
+const RefreshIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" />
+    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+  </svg>
+)
+const EditIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+  </svg>
+)
+const TrashIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+  </svg>
+)
+const CloseIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+)
+
 export default function UsersPage({ onCountChange }) {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [search, setSearch] = useState('')
   const [feedback, setFeedback] = useState({ type: '', message: '' })
-
-  // Estado do formulário de criação
   const [formData, setFormData] = useState({ name: '', email: '' })
-
-  // Estado para edição
   const [editingUser, setEditingUser] = useState(null)
   const [editFormData, setEditFormData] = useState({ newName: '', email: '' })
 
-  // Carrega os usuários ao montar o componente
-  useEffect(() => {
-    fetchUsersList()
-  }, [])
+  useEffect(() => { fetchUsersList() }, [])
 
   const showFeedback = (type, message) => {
     setFeedback({ type, message })
-    setTimeout(() => setFeedback({ type: '', message: '' }), 4000)
+    setTimeout(() => setFeedback({ type: '', message: '' }), 3500)
   }
 
   const fetchUsersList = async () => {
@@ -33,35 +55,32 @@ export default function UsersPage({ onCountChange }) {
       if (onCountChange) onCountChange(data.length)
     } catch (err) {
       console.error(err)
-      showFeedback('error', 'Falha ao buscar usuários. Verifique se o backend está rodando na porta 3000.')
+      showFeedback('error', 'Backend offline — verifique se o servidor está rodando.')
     } finally {
       setLoading(false)
     }
   }
 
-  // Lida com a criação de um novo usuário
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!formData.name.trim() || !formData.email.trim()) {
-      showFeedback('error', 'Por favor, preencha o nome e o e-mail.')
+      showFeedback('error', 'Preencha todos os campos.')
       return
     }
-
     setSubmitting(true)
     try {
       await createUser(formData)
-      showFeedback('success', `Usuário "${formData.name}" cadastrado com sucesso!`)
+      showFeedback('success', `${formData.name} adicionado.`)
       setFormData({ name: '', email: '' })
       await fetchUsersList()
     } catch (err) {
       console.error(err)
-      showFeedback('error', 'Erro ao cadastrar usuário.')
+      showFeedback('error', 'Falha ao cadastrar.')
     } finally {
       setSubmitting(false)
     }
   }
 
-  // Prepara o usuário para edição
   const startEditing = (user) => {
     setEditingUser(user)
     setEditFormData({ newName: user.name, email: user.email || '' })
@@ -72,243 +91,177 @@ export default function UsersPage({ onCountChange }) {
     setEditFormData({ newName: '', email: '' })
   }
 
-  // Salva a edição do usuário
   const handleSaveEdit = async (e) => {
     e.preventDefault()
     if (!editFormData.newName.trim() || !editFormData.email.trim()) {
-      showFeedback('error', 'Nome e e-mail não podem ficar vazios.')
+      showFeedback('error', 'Campos obrigatórios.')
       return
     }
-
     try {
-      await updateUser(editingUser.name, {
-        newName: editFormData.newName,
-        email: editFormData.email,
-      })
-      showFeedback('success', `Usuário "${editingUser.name}" atualizado com sucesso!`)
+      await updateUser(editingUser.name, { newName: editFormData.newName, email: editFormData.email })
+      showFeedback('success', `Registro atualizado.`)
       setEditingUser(null)
       await fetchUsersList()
     } catch (err) {
       console.error(err)
-      showFeedback('error', 'Erro ao atualizar usuário.')
+      showFeedback('error', 'Falha ao atualizar.')
     }
   }
 
-  // Deleta o usuário
   const handleDelete = async (name) => {
-    if (!window.confirm(`Tem certeza que deseja excluir o usuário "${name}"?`)) {
-      return
-    }
-
+    if (!window.confirm(`Excluir "${name}"?`)) return
     try {
       await deleteUser(name)
-      showFeedback('success', `Usuário "${name}" excluído com sucesso!`)
+      showFeedback('success', `${name} removido.`)
       await fetchUsersList()
     } catch (err) {
       console.error(err)
-      showFeedback('error', 'Erro ao excluir usuário.')
+      showFeedback('error', 'Falha ao excluir.')
     }
   }
 
-  // Filtra os usuários pela busca
-  const filteredUsers = users.filter((u) => {
-    const term = search.toLowerCase()
-    const nameMatch = u.name ? u.name.toLowerCase().includes(term) : false
-    const emailMatch = u.email ? u.email.toLowerCase().includes(term) : false
-    return nameMatch || emailMatch
+  const filtered = users.filter((u) => {
+    const t = search.toLowerCase()
+    return (u.name?.toLowerCase().includes(t)) || (u.email?.toLowerCase().includes(t))
   })
 
   return (
-    <div className="page-container">
-      {/* Alerta de Feedback */}
+    <>
       {feedback.message && (
-        <div className={`alert-banner ${feedback.type}`}>
-          <span>{feedback.type === 'success' ? '✅' : '⚠️'}</span>
-          <p>{feedback.message}</p>
-        </div>
+        <div className={`toast ${feedback.type}`}>{feedback.message}</div>
       )}
 
-      <div className="content-grid">
-        {/* Painel Esquerdo: Formulário de Cadastro */}
-        <section className="card form-card">
-          <div className="card-header">
-            <h3>➕ Novo Usuário</h3>
-            <p>Cadastre um novo usuário no Firestore</p>
-          </div>
+      <div className="page-header">
+        <h2>Usuários</h2>
+        <p>Gerencie os registros de usuários conectados ao Firestore.</p>
+      </div>
 
-          <form onSubmit={handleSubmit} className="app-form">
-            <div className="form-group">
-              <label htmlFor="user-name">Nome Completo</label>
+      {/* Inline form */}
+      <section className="form-section">
+        <div className="form-section-title">Adicionar registro</div>
+        <form onSubmit={handleSubmit}>
+          <div className="form-row">
+            <div className="field">
+              <label htmlFor="u-name">Nome</label>
               <input
-                id="user-name"
-                type="text"
-                placeholder="Ex: Henrique Paiva"
+                id="u-name" type="text" placeholder="Henrique Paiva"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
               />
             </div>
-
-            <div className="form-group">
-              <label htmlFor="user-email">E-mail</label>
+            <div className="field">
+              <label htmlFor="u-email">E-mail</label>
               <input
-                id="user-email"
-                type="email"
-                placeholder="Ex: henrique@exemplo.com"
+                id="u-email" type="email" placeholder="henrique@email.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
               />
             </div>
-
-            <button type="submit" className="btn btn-primary" disabled={submitting}>
-              {submitting ? 'Cadastrando...' : 'Cadastrar Usuário'}
+            <button type="submit" className="btn btn-accent" disabled={submitting}>
+              {submitting ? 'Salvando…' : 'Adicionar'}
             </button>
-          </form>
-        </section>
-
-        {/* Painel Direito: Listagem e Gestão de Usuários */}
-        <section className="card list-card">
-          <div className="card-header list-header">
-            <div>
-              <h3>👥 Lista de Usuários</h3>
-              <p>Gerencie os registros existentes</p>
-            </div>
-
-            <div className="header-actions">
-              <input
-                type="text"
-                className="search-input"
-                placeholder="🔍 Buscar por nome ou e-mail..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-              <button
-                className="btn btn-secondary btn-icon"
-                onClick={fetchUsersList}
-                title="Atualizar lista"
-              >
-                🔄
-              </button>
-            </div>
           </div>
+        </form>
+      </section>
 
-          {loading ? (
-            <div className="loading-state">
-              <div className="spinner"></div>
-              <p>Carregando usuários do Firestore...</p>
-            </div>
-          ) : filteredUsers.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">📭</div>
-              <h4>Nenhum usuário encontrado</h4>
-              <p>
-                {search
-                  ? 'Nenhum resultado para os termos da busca.'
-                  : 'Cadastre seu primeiro usuário no formulário ao lado.'}
-              </p>
-            </div>
-          ) : (
-            <div className="table-responsive">
-              <table className="custom-table">
-                <thead>
-                  <tr>
-                    <th>Nome</th>
-                    <th>E-mail</th>
-                    <th>ID (Firestore)</th>
-                    <th style={{ textAlign: 'right' }}>Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredUsers.map((user) => (
-                    <tr key={user.id || user.name}>
-                      <td className="font-semibold">{user.name}</td>
-                      <td className="text-muted">{user.email}</td>
-                      <td>
-                        <span className="badge-id">{user.id || 'N/A'}</span>
-                      </td>
-                      <td style={{ textAlign: 'right' }}>
-                        <div className="action-buttons">
-                          <button
-                            className="btn-action edit"
-                            onClick={() => startEditing(user)}
-                            title="Editar"
-                          >
-                            ✏️
-                          </button>
-                          <button
-                            className="btn-action delete"
-                            onClick={() => handleDelete(user.name)}
-                            title="Excluir"
-                          >
-                            🗑️
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
+      {/* Toolbar */}
+      <div className="toolbar">
+        <div className="toolbar-left">
+          <span className="toolbar-count">{filtered.length} resultado{filtered.length !== 1 ? 's' : ''}</span>
+        </div>
+        <div className="toolbar-left">
+          <div className="search-box">
+            <SearchIcon />
+            <input
+              type="text" placeholder="Buscar…"
+              value={search} onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <button className="btn-refresh" onClick={fetchUsersList} title="Recarregar">
+            <RefreshIcon />
+          </button>
+        </div>
       </div>
 
-      {/* Modal de Edição */}
+      {/* Table */}
+      {loading ? (
+        <div className="loading-well">
+          <div className="loader"></div>
+          <p>Carregando dados…</p>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="empty-well">
+          <h4>{search ? 'Sem resultados' : 'Nenhum registro'}</h4>
+          <p>{search ? 'Tente outro termo de busca.' : 'Adicione o primeiro usuário acima.'}</p>
+        </div>
+      ) : (
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>E-mail</th>
+              <th>ID</th>
+              <th style={{ textAlign: 'right' }}>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((user) => (
+              <tr key={user.id || user.name}>
+                <td className="cell-name">{user.name}</td>
+                <td className="cell-email">{user.email}</td>
+                <td className="cell-id">{user.id || '—'}</td>
+                <td>
+                  <div className="cell-actions">
+                    <button onClick={() => startEditing(user)} title="Editar">
+                      <EditIcon />
+                    </button>
+                    <button className="danger" onClick={() => handleDelete(user.name)} title="Excluir">
+                      <TrashIcon />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      {/* Edit modal */}
       {editingUser && (
-        <div className="modal-backdrop">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3>✏️ Editar Usuário</h3>
-              <button className="btn-close" onClick={cancelEditing}>
-                ✕
-              </button>
+        <div className="overlay" onClick={cancelEditing}>
+          <div className="dialog" onClick={(e) => e.stopPropagation()}>
+            <div className="dialog-head">
+              <h3>Editar usuário</h3>
+              <button className="dialog-close" onClick={cancelEditing}><CloseIcon /></button>
             </div>
-            <form onSubmit={handleSaveEdit} className="app-form">
-              <p className="modal-subtitle">
-                Editando registro de <strong>{editingUser.name}</strong>
-              </p>
-
-              <div className="form-group">
-                <label>Novo Nome</label>
-                <input
-                  type="text"
-                  value={editFormData.newName}
-                  onChange={(e) =>
-                    setEditFormData({ ...editFormData, newName: e.target.value })
-                  }
-                  required
-                />
+            <form onSubmit={handleSaveEdit}>
+              <div className="dialog-body">
+                <p className="dialog-context">
+                  Editando o registro de <strong>{editingUser.name}</strong>
+                </p>
+                <div className="field">
+                  <label>Nome</label>
+                  <input type="text" value={editFormData.newName}
+                    onChange={(e) => setEditFormData({ ...editFormData, newName: e.target.value })}
+                    required />
+                </div>
+                <div className="field">
+                  <label>E-mail</label>
+                  <input type="email" value={editFormData.email}
+                    onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
+                    required />
+                </div>
               </div>
-
-              <div className="form-group">
-                <label>Novo E-mail</label>
-                <input
-                  type="email"
-                  value={editFormData.email}
-                  onChange={(e) =>
-                    setEditFormData({ ...editFormData, email: e.target.value })
-                  }
-                  required
-                />
-              </div>
-
-              <div className="modal-actions">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={cancelEditing}
-                >
-                  Cancelar
-                </button>
-                <button type="submit" className="btn btn-primary">
-                  Salvar Alterações
-                </button>
+              <div className="dialog-footer">
+                <button type="button" className="btn btn-ghost" onClick={cancelEditing}>Cancelar</button>
+                <button type="submit" className="btn btn-accent">Salvar</button>
               </div>
             </form>
           </div>
         </div>
       )}
-    </div>
+    </>
   )
 }
