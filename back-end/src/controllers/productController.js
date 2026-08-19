@@ -22,6 +22,19 @@ export const createProduct = async (req, res) => {
         .status(400)
         .json({ error: "Product name and price are required" });
     }
+    if (typeof name !== "string" || typeof price !== "number") {
+      return res.status(400).json({
+        error: "Product name must be a string and price must be a number",
+      });
+    }
+    if (name.trim() === "") {
+      return res.status(400).json({ error: "Product name cannot be empty" });
+    }
+    if (price <= 0) {
+      return res
+        .status(400)
+        .json({ error: "Product price must be a positive number" });
+    }
     const productRef = await db.collection("products").add({
       name,
       price,
@@ -35,7 +48,21 @@ export const createProduct = async (req, res) => {
 
 export const editProduct = async (req, res) => {
   const { name } = req.params;
-  const { price } = req.body;
+  const { name: newName, price } = req.body;
+  if (!price) {
+    return res.status(400).json({ error: "Product price are required" });
+  }
+  if (typeof price !== "number") {
+    return res.status(400).json({
+      error: "Product price must be a number",
+    });
+  }
+  if (newName !== undefined && newName.trim() === "") {
+    return res.status(400).json({ error: "Product name cannot be empty" });
+  }
+  if (price <= 0) {
+    return res.status(400).json({ error: "Price must be a positive number" });
+  }
   try {
     const snapshot = await db
       .collection("products")
@@ -44,9 +71,13 @@ export const editProduct = async (req, res) => {
     if (snapshot.empty) {
       return res.status(404).json({ error: "Product not found" });
     }
+    const updateData = { price };
+    if (newName !== undefined) {
+      updateData.name = newName;
+    }
     const batch = db.batch();
     snapshot.forEach((doc) => {
-      batch.update(doc.ref, { price });
+      batch.update(doc.ref, updateData);
     });
     await batch.commit();
     res.json({ message: "Product updated successfully" });

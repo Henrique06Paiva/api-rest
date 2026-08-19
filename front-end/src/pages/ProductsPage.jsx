@@ -82,7 +82,8 @@ export default function ProductsPage({ onCountChange }) {
   const [feedback, setFeedback] = useState({ type: "", message: "" });
   const [formData, setFormData] = useState({ name: "", price: "" });
   const [editingProduct, setEditingProduct] = useState(null);
-  const [editPrice, setEditPrice] = useState("");
+  // const [editPrice, setEditPrice] = useState("");
+  const [editFormData, setEditFormData] = useState({ name: "", price: "" });
 
   useEffect(() => {
     fetchProductsList();
@@ -130,24 +131,27 @@ export default function ProductsPage({ onCountChange }) {
 
   const startEditing = (product) => {
     setEditingProduct(product);
-    setEditPrice(product.price !== undefined ? String(product.price) : "");
+    setEditFormData({ newName: product.name, price: product.price });
   };
 
   const cancelEditing = () => {
     setEditingProduct(null);
-    setEditPrice("");
+    setEditFormData({ newName: "", price: "" });
   };
 
   const handleSaveEdit = async (e) => {
     e.preventDefault();
-    const numericPrice = parseFloat(editPrice);
+    const numericPrice = parseFloat(editFormData.price);
     if (isNaN(numericPrice) || numericPrice < 0) {
       showFeedback("error", "Preço inválido.");
       return;
     }
     try {
-      await updateProduct(editingProduct.name, { price: numericPrice });
-      showFeedback("success", `Preço atualizado.`);
+      await updateProduct(editingProduct.name, {
+        name: editFormData.newName,
+        price: numericPrice,
+      });
+      showFeedback("success", `Produto atualizado.`);
       setEditingProduct(null);
       await fetchProductsList();
     } catch (err) {
@@ -286,7 +290,7 @@ export default function ProductsPage({ onCountChange }) {
               <div className="catalog-item-id">{product.id || "—"}</div>
               <div className="catalog-item-actions">
                 <button onClick={() => startEditing(product)}>
-                  <EditIcon /> Preço
+                  <EditIcon /> Editar
                 </button>
                 <button
                   className="danger"
@@ -316,16 +320,36 @@ export default function ProductsPage({ onCountChange }) {
                 <p className="dialog-context">
                   Atualizando valor para <strong>{editingProduct.name}</strong>
                 </p>
+                {/* Campo do Nome */}
                 <div className="field">
-                  <label>Novo preço (R$)</label>
+                  <label htmlFor="newName">Novo nome</label>
+                  <input
+                    type="text"
+                    id="newName"
+                    value={editFormData.newName}
+                    onChange={(e) =>
+                      setEditFormData({
+                        ...editFormData,
+                        newName: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+                {/* Campo do Preço */}
+                <div className="field">
+                  <label htmlFor="newPrice">Novo preço (R$)</label>
                   <input
                     type="number"
                     step="0.01"
                     min="0"
-                    value={editPrice}
-                    onChange={(e) => setEditPrice(e.target.value)}
+                    value={editFormData.price}
+                    onChange={(e) =>
+                      setEditFormData({
+                        ...editFormData,
+                        price: e.target.value,
+                      })
+                    }
                     required
-                    autoFocus
                   />
                 </div>
               </div>

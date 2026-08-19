@@ -19,8 +19,22 @@ export const getUser = getUsers;
 export const createUser = async (req, res) => {
   try {
     const { name, email } = req.body;
+    // validação de campos vazios
     if (!name || !email) {
       return res.status(400).json({ error: "Name and email are required" });
+    }
+    // validação de tipos de dados
+    if (typeof name !== "string" || typeof email !== "string") {
+      return res.status(400).json({ error: "Name and email must be strings" });
+    }
+    // validação de campos vazios após remover espaços em branco
+    if (name.trim() === "" || email.trim() === "") {
+      return res.status(400).json({ error: "Name and email cannot be empty" });
+    }
+    // validação de formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: "Invalid email format" });
     }
     const newUser = { name, email };
     const docRef = await db.collection("users").add(newUser);
@@ -35,6 +49,19 @@ export const editUser = async (req, res) => {
   const { name } = req.params;
   const { newName } = req.body;
   const { email } = req.body;
+  if (!newName || !email) {
+    return res.status(400).json({ error: "Name and email are required" });
+  }
+  if (typeof newName !== "string" || typeof email !== "string") {
+    return res.status(400).json({ error: "Name and email must be strings" });
+  }
+  if (newName.trim() === "" || email.trim() === "") {
+    return res.status(400).json({ error: "Name and email cannot be empty" });
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ error: "Invalid email format" });
+  }
   try {
     const snapshot = await db
       .collection("users")
