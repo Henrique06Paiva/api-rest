@@ -1,6 +1,11 @@
-import React from 'react'
+import React from "react";
 
-export default function Navbar({ activeTab, setActiveTab, usersCount, productsCount }) {
+export default function Navbar({
+  activeTab,
+  setActiveTab,
+  usersCount,
+  productsCount,
+}) {
   return (
     <header className="navbar">
       <div className="nav-container">
@@ -8,14 +13,13 @@ export default function Navbar({ activeTab, setActiveTab, usersCount, productsCo
           <div className="brand-logo">⚡</div>
           <div className="brand-text">
             <h2>REST Manager Hub</h2>
-            <span className="brand-badge">Firebase Firestore API</span>
           </div>
         </div>
 
         <nav className="nav-tabs">
           <button
-            className={`nav-tab ${activeTab === 'users' ? 'active' : ''}`}
-            onClick={() => setActiveTab('users')}
+            className={`nav-tab ${activeTab === "users" ? "active" : ""}`}
+            onClick={() => setActiveTab("users")}
           >
             <span className="tab-icon">👥</span>
             <span>Usuários</span>
@@ -23,8 +27,8 @@ export default function Navbar({ activeTab, setActiveTab, usersCount, productsCo
           </button>
 
           <button
-            className={`nav-tab ${activeTab === 'products' ? 'active' : ''}`}
-            onClick={() => setActiveTab('products')}
+            className={`nav-tab ${activeTab === "products" ? "active" : ""}`}
+            onClick={() => setActiveTab("products")}
           >
             <span className="tab-icon">📦</span>
             <span>Produtos</span>
@@ -33,5 +37,5 @@ export default function Navbar({ activeTab, setActiveTab, usersCount, productsCo
         </nav>
       </div>
     </header>
-  )
+  );
 }

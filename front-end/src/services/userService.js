@@ -14,7 +14,10 @@ export const createUser = async (userData) => {
 
 // Atualiza um usuário existente pelo nome
 export const updateUser = async (name, userData) => {
-  const response = await api.put(`/users/${encodeURIComponent(name)}`, userData);
+  const response = await api.put(
+    `/users/${encodeURIComponent(name)}`,
+    userData,
+  );
   return response.data;
 };
 

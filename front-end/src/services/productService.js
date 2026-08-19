@@ -14,7 +14,10 @@ export const createProduct = async (productData) => {
 
 // Atualiza o preço de um produto existente pelo nome
 export const updateProduct = async (name, productData) => {
-  const response = await api.put(`/products/${encodeURIComponent(name)}`, productData);
+  const response = await api.put(
+    `/products/${encodeURIComponent(name)}`,
+    productData,
+  );
   return response.data;
 };
 
