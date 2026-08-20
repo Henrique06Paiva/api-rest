@@ -80,9 +80,17 @@ export default function UsersPage({ onCountChange }) {
   const [submitting, setSubmitting] = useState(false);
   const [search, setSearch] = useState("");
   const [feedback, setFeedback] = useState({ type: "", message: "" });
-  const [formData, setFormData] = useState({ name: "", email: "" });
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
   const [editingUser, setEditingUser] = useState(null);
-  const [editFormData, setEditFormData] = useState({ newName: "", email: "" });
+  const [editFormData, setEditFormData] = useState({
+    newName: "",
+    email: "",
+    password: "",
+  });
 
   useEffect(() => {
     fetchUsersList();
@@ -120,7 +128,7 @@ export default function UsersPage({ onCountChange }) {
     try {
       await createUser(formData);
       showFeedback("success", `${formData.name} adicionado.`);
-      setFormData({ name: "", email: "" });
+      setFormData({ name: "", email: "", password: "" });
       await fetchUsersList();
     } catch (err) {
       console.error(err);
@@ -132,17 +140,25 @@ export default function UsersPage({ onCountChange }) {
 
   const startEditing = (user) => {
     setEditingUser(user);
-    setEditFormData({ newName: user.name, email: user.email || "" });
+    setEditFormData({
+      newName: user.name,
+      email: user.email || "",
+      password: user.password || "",
+    });
   };
 
   const cancelEditing = () => {
     setEditingUser(null);
-    setEditFormData({ newName: "", email: "" });
+    setEditFormData({ newName: "", email: "", password: "" });
   };
 
   const handleSaveEdit = async (e) => {
     e.preventDefault();
-    if (!editFormData.newName.trim() || !editFormData.email.trim()) {
+    if (
+      !editFormData.newName.trim() ||
+      !editFormData.email.trim() ||
+      !editFormData.password.trim()
+    ) {
       showFeedback("error", "Campos obrigatórios.");
       return;
     }
@@ -150,6 +166,7 @@ export default function UsersPage({ onCountChange }) {
       await updateUser(editingUser.name, {
         newName: editFormData.newName,
         email: editFormData.email,
+        password: editFormData.password,
       });
       showFeedback("success", `Registro atualizado.`);
       setEditingUser(null);
@@ -217,6 +234,19 @@ export default function UsersPage({ onCountChange }) {
                 value={formData.email}
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
+                }
+                required
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="u-password">Senha</label>
+              <input
+                id="u-password"
+                type="password"
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
                 }
                 required
               />
@@ -348,6 +378,20 @@ export default function UsersPage({ onCountChange }) {
                       setEditFormData({
                         ...editFormData,
                         email: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+                <div className="field">
+                  <label>Senha</label>
+                  <input
+                    type="password"
+                    value={editFormData.password}
+                    onChange={(e) =>
+                      setEditFormData({
+                        ...editFormData,
+                        password: e.target.value,
                       })
                     }
                     required

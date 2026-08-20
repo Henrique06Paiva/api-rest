@@ -18,25 +18,42 @@ export const getUser = getUsers;
 
 export const createUser = async (req, res) => {
   try {
-    const { name, email } = req.body;
+    const { name, email, password } = req.body;
     // validação de campos vazios
-    if (!name || !email) {
-      return res.status(400).json({ error: "Name and email are required" });
+    if (!name || !email || !password) {
+      return res
+        .status(400)
+        .json({ error: "Name, email, and password are required" });
     }
     // validação de tipos de dados
-    if (typeof name !== "string" || typeof email !== "string") {
-      return res.status(400).json({ error: "Name and email must be strings" });
+    if (
+      typeof name !== "string" ||
+      typeof email !== "string" ||
+      typeof password !== "string"
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Name, email, and password must be strings" });
     }
     // validação de campos vazios após remover espaços em branco
-    if (name.trim() === "" || email.trim() === "") {
-      return res.status(400).json({ error: "Name and email cannot be empty" });
+    if (name.trim() === "" || email.trim() === "" || password.trim() === "") {
+      return res
+        .status(400)
+        .json({ error: "Name, email, and password cannot be empty" });
     }
     // validação de formato de email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ error: "Invalid email format" });
     }
-    const newUser = { name, email };
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        error:
+          "Password must be at least 8 characters long and contain at least one letter and one number",
+      });
+    }
+    const newUser = { name, email, password };
     const docRef = await db.collection("users").add(newUser);
     res.status(201).json({ id: docRef.id, ...newUser });
   } catch (error) {
@@ -49,18 +66,36 @@ export const editUser = async (req, res) => {
   const { name } = req.params;
   const { newName } = req.body;
   const { email } = req.body;
-  if (!newName || !email) {
-    return res.status(400).json({ error: "Name and email are required" });
+  const { password } = req.body;
+  if (!newName || !email || !password) {
+    return res
+      .status(400)
+      .json({ error: "Name, email, and password are required" });
   }
-  if (typeof newName !== "string" || typeof email !== "string") {
-    return res.status(400).json({ error: "Name and email must be strings" });
+  if (
+    typeof newName !== "string" ||
+    typeof email !== "string" ||
+    typeof password !== "string"
+  ) {
+    return res
+      .status(400)
+      .json({ error: "Name, email, and password must be strings" });
   }
-  if (newName.trim() === "" || email.trim() === "") {
-    return res.status(400).json({ error: "Name and email cannot be empty" });
+  if (newName.trim() === "" || email.trim() === "" || password.trim() === "") {
+    return res
+      .status(400)
+      .json({ error: "Name, email, and password cannot be empty" });
   }
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     return res.status(400).json({ error: "Invalid email format" });
+  }
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+  if (!passwordRegex.test(password)) {
+    return res.status(400).json({
+      error:
+        "Password must be at least 8 characters long and contain at least one letter and one number",
+    });
   }
   try {
     const snapshot = await db
@@ -72,7 +107,7 @@ export const editUser = async (req, res) => {
     }
     const batch = db.batch();
     snapshot.forEach((doc) => {
-      batch.update(doc.ref, { name: newName, email });
+      batch.update(doc.ref, { name: newName, email, password });
     });
     await batch.commit();
     res.json({ message: "User updated successfully" });
